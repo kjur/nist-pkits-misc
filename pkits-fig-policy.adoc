@@ -1,0 +1,2099 @@
+
+:toc:
+:toclevels: 5
+:toc-title: 目次
+
+# NIST PKITSのポリシー処理に関するテストケースの図
+
+## はじめに
+本資料はNISTの https://csrc.nist.gov/projects/pki-testing[証明書パス検証テストスイート(NIST PKITS)] のポリシー処理関連のテストケースを理解しやすさのため自動処理で図にしたものです。
+
+## 表記方法
+図の簡素化のため以下の表記方法を採用しています。
+
+- 図の表記法である https://mermaid.js.org/[Mermaid] のクラス図を利用して証明書の認証パス、初期値、期待値を図にしています。
+- 証明書ポリシーは以下のように簡略化してます。
+ - anyPolicyはanyとします。
+ - PKITSテスト用証明書ポリシOID(2.16.840.1.101.3.2.1.48.1〜8)はN1〜8とします。
+- 自己発行(self issued)証明書はクラスの自身にループする矢印で表現します。
+- 証明書の発行はそれ以外の矢印で表現します。
+
+## 8. 証明書ポリシーツリーに関する基本的なテスト
+
+### 8.1.1 ポリシツリー正常系:ポリシ明示 RT>IA1(N1)>EE(N1) 初期([any],exp1,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=true\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[N1]\nuser-constrained-policy-set=[N1]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+  }
+  class EndEntity {
+    certificatePolicies=[N1]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> EndEntity
+```
+### 8.1.2 ポリシツリー正常系:ポリシ明示 RT>IA1(N1)>EE(N1) 初期([N1],exp1,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[N1]\ninitial-explicit-policy=true\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[N1]\nuser-constrained-policy-set=[N1]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+  }
+  class EndEntity {
+    certificatePolicies=[N1]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> EndEntity
+```
+### 8.1.3 ポリシツリー異常系:ポリシ明示 RT>IA1(N1)>EE(N1) 初期([N2],exp1,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[N2]\ninitial-explicit-policy=true\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[N1]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+  }
+  class EndEntity {
+    certificatePolicies=[N1]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> EndEntity
+```
+### 8.1.4 ポリシツリー正常系:ポリシ明示 RT>IA1(N1)>EE(N1) 初期([N1,N2],exp1,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[N1,N2]\ninitial-explicit-policy=true\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[N1]\nuser-constrained-policy-set=[N1]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+  }
+  class EndEntity {
+    certificatePolicies=[N1]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> EndEntity
+```
+### 8.2.1 ポリシツリー正常系:ポリシ明示とany RT>IA1(nocp)>EE(nocp) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[]
+  }
+  class EndEntity {
+    certificatePolicies=[]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> EndEntity
+```
+### 8.2.2 ポリシツリー異常系:ポリシ明示とany RT>IA1(nocp)>EE(nocp) 初期([any],exp1,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=true\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[]
+  }
+  class EndEntity {
+    certificatePolicies=[]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> EndEntity
+```
+### 8.3.1 ポリシツリー正常系:ポリシ明示 RT>IA1(N1)>IA2(N2)>EE(N2) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N2]
+  }
+  class EndEntity {
+    certificatePolicies=[N2]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> EndEntity
+```
+### 8.3.2 ポリシツリー異常系:ポリシ明示 RT>IA1(N1)>IA2(N2)>EE(N2) 初期([any],exp1,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=true\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N2]
+  }
+  class EndEntity {
+    certificatePolicies=[N2]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> EndEntity
+```
+### 8.3.3 ポリシツリー異常系:ポリシ明示 RT>IA1(N1)>IA2(N2)>EE(N2) 初期([N1,N2],exp1,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[N1,N2]\ninitial-explicit-policy=true\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N2]
+  }
+  class EndEntity {
+    certificatePolicies=[N2]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> EndEntity
+```
+### 8.4 ポリシツリー異常系:ポリシ明示拡張 RT>IA1(N1)>IA2(N1,reqexp=0)>EE(N2) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N1]
+    requireExplicitPolicy=0
+  }
+  class EndEntity {
+    certificatePolicies=[N2]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> EndEntity
+```
+### 8.5 ポリシツリー異常系:ポリシ明示拡張 RT>IA1(N1)>IA2(N2,reqexp=0)>EE(N1) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N2]
+    requireExplicitPolicy=0
+  }
+  class EndEntity {
+    certificatePolicies=[N1]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> EndEntity
+```
+### 8.6.1 ポリシツリー正常系:ポリシ明示拡張 RT>IA1(N1,N2,N3,N4,reqexp=0)>IA2(N1,N2,N3)>IA3(N1,N2)>EE(N1) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[N1]\nuser-constrained-policy-set=[N1]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1,N2,N3,N4]
+    requireExplicitPolicy=0
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N1,N2,N3]
+  }
+  class IntermediateCA3 {
+    certificatePolicies=[N1,N2]
+  }
+  class IntermediateCA4 {
+    certificatePolicies=[N1]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> IntermediateCA3
+IntermediateCA3 --|> IntermediateCA4
+```
+### 8.6.2 ポリシツリー正常系:ポリシ明示拡張 RT>IA1(N1,N2,N3,N4,reqexp=0)>IA2(N1,N2,N3)>IA3(N1,N2)>EE(N1) 初期([N1],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[N1]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[N1]\nuser-constrained-policy-set=[N1]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1,N2,N3,N4]
+    requireExplicitPolicy=0
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N1,N2,N3]
+  }
+  class IntermediateCA3 {
+    certificatePolicies=[N1,N2]
+  }
+  class IntermediateCA4 {
+    certificatePolicies=[N1]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> IntermediateCA3
+IntermediateCA3 --|> IntermediateCA4
+```
+### 8.6.3 ポリシツリー異常系:ポリシ明示拡張 RT>IA1(N1,N2,N3,N4,reqexp=0)>IA2(N1,N2,N3)>IA3(N1,N2)>EE(N1) 初期([N2],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[N2]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[N1]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1,N2,N3,N4]
+    requireExplicitPolicy=0
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N1,N2,N3]
+  }
+  class IntermediateCA3 {
+    certificatePolicies=[N1,N2]
+  }
+  class IntermediateCA4 {
+    certificatePolicies=[N1]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> IntermediateCA3
+IntermediateCA3 --|> IntermediateCA4
+```
+### 8.7 ポリシツリー異常系:ポリシ明示拡張 RT>IA1(N1,N2,N3,reqexp=0)>IA2(N1,N2)>IA3(N1)>IA4(N2) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1,N2,N3]
+    requireExplicitPolicy=0
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N1,N2]
+  }
+  class IntermediateCA3 {
+    certificatePolicies=[N1]
+  }
+  class IntermediateCA4 {
+    certificatePolicies=[N2]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> IntermediateCA3
+IntermediateCA3 --|> IntermediateCA4
+```
+### 8.8 ポリシツリー異常系:ポリシ明示拡張 RT>IA1(N1,N2,reqexp=0)>IA2(N1)>IA3(N2)>IA4(N2) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1,N2]
+    requireExplicitPolicy=0
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N1]
+  }
+  class IntermediateCA3 {
+    certificatePolicies=[N2]
+  }
+  class IntermediateCA4 {
+    certificatePolicies=[N2]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> IntermediateCA3
+IntermediateCA3 --|> IntermediateCA4
+```
+### 8.9 ポリシツリー異常系:ポリシ明示拡張 RT>IA1(N1,N2,N3,reqexp=0)>IA2(N1,N2)>IA3(N2)>IA4(N1)>EE(N1) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1,N2,N3]
+    requireExplicitPolicy=0
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N1,N2]
+  }
+  class IntermediateCA3 {
+    certificatePolicies=[N2]
+  }
+  class IntermediateCA4 {
+    certificatePolicies=[N1]
+  }
+  class EndEntity {
+    certificatePolicies=[N1]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> IntermediateCA3
+IntermediateCA3 --|> IntermediateCA4
+IntermediateCA4 --|> EndEntity
+```
+### 8.10.1 ポリシツリー正常系:ポリシ明示拡張 RT>IA1(N1,N2,reqexp=0)>EE(N1,N2) 初期([N1],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[N1]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[N1,N2]\nuser-constrained-policy-set=[N1]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1,N2]
+    requireExplicitPolicy=0
+  }
+  class EndEntity {
+    certificatePolicies=[N1,N2]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> EndEntity
+```
+### 8.10.2 ポリシツリー正常系:ポリシ明示拡張 RT>IA1(N1,N2,reqexp=0)>EE(N1,N2) 初期([N2],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[N2]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[N1,N2]\nuser-constrained-policy-set=[N2]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1,N2]
+    requireExplicitPolicy=0
+  }
+  class EndEntity {
+    certificatePolicies=[N1,N2]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> EndEntity
+```
+### 8.10.3 ポリシツリー正常系:ポリシ明示拡張 RT>IA1(N1,N2,reqexp=0)>EE(N1,N2) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[N1,N2]\nuser-constrained-policy-set=[N1,N2]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1,N2]
+    requireExplicitPolicy=0
+  }
+  class EndEntity {
+    certificatePolicies=[N1,N2]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> EndEntity
+```
+### 8.11.1 ポリシツリー正常系:ポリシ明示拡張any RT>IA1(any,reqexp=0)>EE(any) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[any]\nuser-constrained-policy-set=[any]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[any]
+    requireExplicitPolicy=0
+  }
+  class EndEntity {
+    certificatePolicies=[any]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> EndEntity
+```
+### 8.11.2 ポリシツリー正常系:ポリシ明示拡張any RT>IA1(any,reqexp=0)>EE(any) 初期([N1],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[N1]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[any]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[any]
+    requireExplicitPolicy=0
+  }
+  class EndEntity {
+    certificatePolicies=[any]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> EndEntity
+```
+### 8.12 ポリシツリー異常系:ポリシ明示拡張any RT>IA1(N3,reqexp=0)>EE(N4) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N3]
+    requireExplicitPolicy=0
+  }
+  class EndEntity {
+    certificatePolicies=[N4]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> EndEntity
+```
+### 8.13.1 ポリシツリー正常系:ポリシ明示拡張 RT>IA1(N1,N2,N3,reqexp=0)>EE(N1,N2,N3) 初期([N1],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[N1]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[N1,N2,N3]\nuser-constrained-policy-set=[N1]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1,N2,N3]
+    requireExplicitPolicy=0
+  }
+  class EndEntity {
+    certificatePolicies=[N1,N2,N3]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> EndEntity
+```
+### 8.13.2 ポリシツリー正常系:ポリシ明示拡張 RT>IA1(N1,N2,N3,reqexp=0)>EE(N1,N2,N3) 初期([N2],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[N2]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[N1,N2,N3]\nuser-constrained-policy-set=[N2]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1,N2,N3]
+    requireExplicitPolicy=0
+  }
+  class EndEntity {
+    certificatePolicies=[N1,N2,N3]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> EndEntity
+```
+### 8.13.3 ポリシツリー正常系:ポリシ明示拡張 RT>IA1(N1,N2,N3,reqexp=0)>EE(N1,N2,N3) 初期([N3],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[N3]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[N1,N2,N3]\nuser-constrained-policy-set=[N3]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1,N2,N3]
+    requireExplicitPolicy=0
+  }
+  class EndEntity {
+    certificatePolicies=[N1,N2,N3]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> EndEntity
+```
+### 8.14.1 ポリシツリー正常系:ポリシ明示拡張any RT>IA1(any,reqexp=0)>EE(N1) 初期([N1],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[N1]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[N1]\nuser-constrained-policy-set=[N1]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[any]
+    requireExplicitPolicy=0
+  }
+  class EndEntity {
+    certificatePolicies=[N1]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> EndEntity
+```
+### 8.14.2 ポリシツリー異常系:ポリシ明示拡張any RT>IA1(any,reqexp=0)>EE(N1) 初期([N2],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[N2]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[N1]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[any]
+    requireExplicitPolicy=0
+  }
+  class EndEntity {
+    certificatePolicies=[N1]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> EndEntity
+```
+### 8.15 ポリシツリー正常系:証明書ポリシunotice RT>EE(N1:unotice) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[N1]\nuser-constrained-policy-set=[N1]"
+  class TrustAnchor {
+    
+  }
+  class EndEntity {
+    certificatePolicies=[N1]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> EndEntity
+```
+### 8.16 ポリシツリー正常系:証明書ポリシunotice RT>IA1(N1)>EE(N1:unotice,N2:unotice) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[N1]\nuser-constrained-policy-set=[N1]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+  }
+  class EndEntity {
+    certificatePolicies=[N1,N2]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> EndEntity
+```
+### 8.17 ポリシツリー正常系:証明書ポリシunotice RT>IA1(N1)>EE(any:unotice) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[N1]\nuser-constrained-policy-set=[N1]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+  }
+  class EndEntity {
+    certificatePolicies=[any]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> EndEntity
+```
+### 8.18.1 ポリシツリー正常系:証明書ポリシunotice RT>IA1(N1,N2)>EE(N1:unotice,any:unotice) 初期([N1],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[N1]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[N1,N2]\nuser-constrained-policy-set=[N1]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1,N2]
+    requireExplicitPolicy=0
+  }
+  class EndEntity {
+    certificatePolicies=[N1,any]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> EndEntity
+```
+### 8.18.2 ポリシツリー正常系:証明書ポリシunotice RT>IA1(N1,N2)>EE(N1:unotice,any:unotice) 初期([N2],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[N2]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[N1,N2]\nuser-constrained-policy-set=[N2]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1,N2]
+    requireExplicitPolicy=0
+  }
+  class EndEntity {
+    certificatePolicies=[N1,any]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> EndEntity
+```
+### 8.19 ポリシツリー正常系:証明書ポリシunotice RT>>EE(any:unotice200) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[N1]\nuser-constrained-policy-set=[N1]"
+  class TrustAnchor {
+    
+  }
+  class EndEntity {
+    certificatePolicies=[N1]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> EndEntity
+```
+### 8.20 ポリシツリー正常系:証明書ポリシcps RT>IA1(N1)>EE(N1:cps) 初期([any],exp1,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=true\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[N1]\nuser-constrained-policy-set=[N1]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+  }
+  class EndEntity {
+    certificatePolicies=[N1]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> EndEntity
+```
+## 9. ポリシー制約拡張のポリシー明示(requiredExplicitPolicy)に関するテスト
+
+### 9.1 ポリシ明示拡張正常系: RT>IA1(N1,reqexp=10)>IA2(N1)>IA3(N1)>IA4(N1)>EE(nocp) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+    requireExplicitPolicy=10
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N1]
+  }
+  class IntermediateCA3 {
+    certificatePolicies=[N1]
+  }
+  class IntermediateCA4 {
+    certificatePolicies=[N1]
+  }
+  class EndEntity {
+    certificatePolicies=[]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> IntermediateCA3
+IntermediateCA3 --|> IntermediateCA4
+IntermediateCA4 --|> EndEntity
+```
+### 9.2 ポリシ明示拡張正常系: RT>IA1(N1,reqexp=5)>IA2(N1)>IA3(N1)>IA4(N1)>EE(nocp) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+    requireExplicitPolicy=5
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N1]
+  }
+  class IntermediateCA3 {
+    certificatePolicies=[N1]
+  }
+  class IntermediateCA4 {
+    certificatePolicies=[N1]
+  }
+  class EndEntity {
+    certificatePolicies=[]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> IntermediateCA3
+IntermediateCA3 --|> IntermediateCA4
+IntermediateCA4 --|> EndEntity
+```
+### 9.3 ポリシ明示拡張異常系: RT>IA1(N1,reqexp=4)>IA2(N1)>IA3(N1)>IA4(N1)>EE(nocp) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+    requireExplicitPolicy=4
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N1]
+  }
+  class IntermediateCA3 {
+    certificatePolicies=[N1]
+  }
+  class IntermediateCA4 {
+    certificatePolicies=[N1]
+  }
+  class EndEntity {
+    certificatePolicies=[]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> IntermediateCA3
+IntermediateCA3 --|> IntermediateCA4
+IntermediateCA4 --|> EndEntity
+```
+### 9.4 ポリシ明示拡張正常系: RT>IA1(N1,reqexp=0)>IA2(N1)>IA3(N1)>IA4(N1)>EE(nocp) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[N1]\nuser-constrained-policy-set=[N1]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+    requireExplicitPolicy=0
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N1]
+  }
+  class IntermediateCA3 {
+    certificatePolicies=[N1]
+  }
+  class IntermediateCA4 {
+    certificatePolicies=[N1]
+  }
+  class EndEntity {
+    certificatePolicies=[N1]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> IntermediateCA3
+IntermediateCA3 --|> IntermediateCA4
+IntermediateCA4 --|> EndEntity
+```
+### 9.5 ポリシ明示拡張異常系: RT>IA1(N1,reqexp=7)>IA2(N1,reqexp=2)>IA3(N1,reqexp=4)>IA4(N1)>EE(nocp) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+    requireExplicitPolicy=7
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N1]
+    requireExplicitPolicy=2
+  }
+  class IntermediateCA3 {
+    certificatePolicies=[N1]
+    requireExplicitPolicy=4
+  }
+  class IntermediateCA4 {
+    certificatePolicies=[N1]
+  }
+  class EndEntity {
+    certificatePolicies=[]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> IntermediateCA3
+IntermediateCA3 --|> IntermediateCA4
+IntermediateCA4 --|> EndEntity
+```
+### 9.6 ポリシ明示拡張正常系:自己発行1 RT>IA1(N1,reqexp=2)>IA2si(N1)>EE(nocp) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+    requireExplicitPolicy=2
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N1]
+  }
+  class EndEntity {
+    certificatePolicies=[]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA2 --|> IntermediateCA2
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> EndEntity
+```
+### 9.7 ポリシ明示拡張異常系:自己発行1 RT>IA1(N1,reqexp=2)>IA2si(N1)>IA3(N1)>EE(nocp) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+    requireExplicitPolicy=2
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N1]
+  }
+  class IntermediateCA3 {
+    certificatePolicies=[N1]
+  }
+  class EndEntity {
+    certificatePolicies=[]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA2 --|> IntermediateCA2
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> IntermediateCA3
+IntermediateCA3 --|> EndEntity
+```
+### 9.8 ポリシ明示拡張異常系:自己発行2 RT>IA1(N1,reqexp=2)>qIA2si(N1)>IA3(N1)>IA4si(N1)>EE(nocp) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+    requireExplicitPolicy=2
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N1]
+  }
+  class IntermediateCA3 {
+    certificatePolicies=[N1]
+  }
+  class IntermediateCA4 {
+    certificatePolicies=[N1]
+  }
+  class EndEntity {
+    certificatePolicies=[]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA2 --|> IntermediateCA2
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> IntermediateCA3
+IntermediateCA4 --|> IntermediateCA4
+IntermediateCA3 --|> IntermediateCA4
+IntermediateCA4 --|> EndEntity
+```
+## 10. ポリシーマッピングに関するテスト
+
+### 10.1.1 ポリシマップ拡張正常系: RT>IA1(N1,map=N1>N2,reqexp=0)>EE(N2) 初期([N1],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[N1]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[N1]\nuser-constrained-policy-set=[N1]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+    requireExplicitPolicy=0
+    policyMappings=[[N1,N2]]
+  }
+  class EndEntity {
+    certificatePolicies=[N2]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> EndEntity
+```
+### 10.1.2 ポリシマップ拡張異常系: RT>IA1(N1,map=N1>N2,reqexp=0)>EE(N2) 初期([N2],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[N2]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[N1]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+    requireExplicitPolicy=0
+    policyMappings=[[N1,N2]]
+  }
+  class EndEntity {
+    certificatePolicies=[N2]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> EndEntity
+```
+### 10.1.3 ポリシマップ拡張異常系:マップ禁止 RT>IA1(N1,map=N1>N2,reqexp=0)>EE(N2) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=true\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+    requireExplicitPolicy=0
+    policyMappings=[[N1,N2]]
+  }
+  class EndEntity {
+    certificatePolicies=[N2]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> EndEntity
+```
+### 10.2.1 ポリシマップ拡張異常系: RT>IA1(N1,map=N1>N2,reqexp=0)>EE(N1) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+    requireExplicitPolicy=0
+    policyMappings=[[N1,N2]]
+  }
+  class EndEntity {
+    certificatePolicies=[N1]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> EndEntity
+```
+### 10.2.2 ポリシマップ拡張異常系: RT>IA1(N1,map=N1>N2,reqexp=0)>EE(N1) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=true\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+    requireExplicitPolicy=0
+    policyMappings=[[N1,N2]]
+  }
+  class EndEntity {
+    certificatePolicies=[N1]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> EndEntity
+```
+### 10.3.1 ポリシマップ拡張異常系: RT>IA1(N1,N2,map=N1>N3,reqexp=0)>IA2(N2,N5,map=N2>N4:N5>N7)>IA3(N3,N4,map=N4>N8)>EE(N8) 初期([N1],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[N1]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[N2]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1,N2]
+    requireExplicitPolicy=0
+    policyMappings=[[N1,N3]]
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N2,N5]
+    policyMappings=[[N2,N4],[N5,N7]]
+  }
+  class IntermediateCA3 {
+    certificatePolicies=[N3,N4]
+    policyMappings=[[N4,N8]]
+  }
+  class EndEntity {
+    certificatePolicies=[N8]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> IntermediateCA3
+IntermediateCA3 --|> EndEntity
+```
+### 10.3.2 ポリシマップ拡張正常系: RT>IA1(N1,N2,map=N1>N3,reqexp=0)>IA2(N2,N5,map=N2>N4:N5>N7)>IA3(N3,N4,map=N4>N8)>EE(N8) 初期([N2],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[N2]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[N2]\nuser-constrained-policy-set=[N2]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1,N2]
+    requireExplicitPolicy=0
+    policyMappings=[[N1,N3]]
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N2,N5]
+    policyMappings=[[N2,N4],[N5,N7]]
+  }
+  class IntermediateCA3 {
+    certificatePolicies=[N3,N4]
+    policyMappings=[[N4,N8]]
+  }
+  class EndEntity {
+    certificatePolicies=[N8]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> IntermediateCA3
+IntermediateCA3 --|> EndEntity
+```
+### 10.4 ポリシマップ拡張異常系: RT>IA1(N1,N2,map=N1>N3,reqexp=0)>IA2(N2,N5,map=N2>N4:N5>N7)>IA3(N3,N4,map=N4>N8)>EE(N3) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[N1]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1,N2]
+    requireExplicitPolicy=0
+    policyMappings=[[N1,N3]]
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N2,N5]
+    policyMappings=[[N2,N4],[N5,N7]]
+  }
+  class IntermediateCA3 {
+    certificatePolicies=[N3,N4]
+    policyMappings=[[N4,N8]]
+  }
+  class EndEntity {
+    certificatePolicies=[N3]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> IntermediateCA3
+IntermediateCA3 --|> EndEntity
+```
+### 10.5.1 ポリシマップ拡張正常系: RT>IA1(N1,map=N1>N2:N1>N3:N1>N4,reqexp=0)>IA2(N2,N4,map=N2>N5:N4>N6)>>EE(N6) 初期([N1],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[N1]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[N1]\nuser-constrained-policy-set=[N1]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+    requireExplicitPolicy=0
+    policyMappings=[[N1,N2],[N1,N3],[N1,N4]]
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N2,N4]
+    policyMappings=[[N2,N5],[N4,N6]]
+  }
+  class EndEntity {
+    certificatePolicies=[N6]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> EndEntity
+```
+### 10.5.2 ポリシマップ拡張異常系: RT>IA1(N1,map=N1>N2:N1>N3:N1>N4,reqexp=0)>IA2(N2,N4,map=N2>N5:N4>N6)>>EE(N6) 初期([N6],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[N6]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[N1]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+    requireExplicitPolicy=0
+    policyMappings=[[N1,N2],[N1,N3],[N1,N4]]
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N2,N4]
+    policyMappings=[[N2,N5],[N4,N6]]
+  }
+  class EndEntity {
+    certificatePolicies=[N6]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> EndEntity
+```
+### 10.6.1 ポリシマップ拡張正常系: RT>IA1(N1,map=N1>N2:N1>N3:N1>N4,reqexp=0)>IA2(N2,N4,map=N2>N5:N4>N6)>>EE(N5) 初期([N1],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[N1]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[N1]\nuser-constrained-policy-set=[N1]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+    requireExplicitPolicy=0
+    policyMappings=[[N1,N2],[N1,N3],[N1,N4]]
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N2,N4]
+    policyMappings=[[N2,N5],[N4,N6]]
+  }
+  class EndEntity {
+    certificatePolicies=[N5]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> EndEntity
+```
+### 10.6.2 ポリシマップ拡張異常系: RT>IA1(N1,map=N1>N2:N1>N3:N1>N4,reqexp=0)>IA2(N2,N4,map=N2>N5:N4>N6)>>EE(N5) 初期([N6],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[N6]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[N1]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+    requireExplicitPolicy=0
+    policyMappings=[[N1,N2],[N1,N3],[N1,N4]]
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N2,N4]
+    policyMappings=[[N2,N5],[N4,N6]]
+  }
+  class EndEntity {
+    certificatePolicies=[N5]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> EndEntity
+```
+["10.7",false,"t10-07.pem","ポリシマップ拡張異常系:any RT>IA1(any,map=any>N1,reqexp=0)>EE(N1) int(-,exp0,map,any0)"]
+["10.8",false,"t10-08.pem","ポリシマップ拡張異常系:any RT>IA1(N1,map=N1>any,reqexp=0)>EE(any) int(-,exp0,map,any0)"]
+### 10.9 ポリシマップ拡張正常系: RT>IA1(any,map=N1>N2,reqexp=0)>EE(N1) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[N1]\nuser-constrained-policy-set=[N1]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[any]
+    requireExplicitPolicy=0
+    policyMappings=[[N1,N2]]
+  }
+  class EndEntity {
+    certificatePolicies=[N1]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> EndEntity
+```
+### 10.10 ポリシマップ拡張異常系: RT>IA1(N1)>IA2(any,map=N1>N2,reqexp=0)>EE(N1) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[any]
+    requireExplicitPolicy=0
+    policyMappings=[[N1,N2]]
+  }
+  class EndEntity {
+    certificatePolicies=[N1]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> EndEntity
+```
+### 10.11 ポリシマップ拡張正常系: RT>IA1(N1)>IA2(any,map=N1>N2,reqexp=0)>EE(N2) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[N1]\nuser-constrained-policy-set=[N1]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[any]
+    requireExplicitPolicy=0
+    policyMappings=[[N1,N2]]
+  }
+  class EndEntity {
+    certificatePolicies=[N2]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> EndEntity
+```
+### 10.12.1 ポリシマップ拡張unotice正常系: RT>IA1(N1,N2,map=N1>N3,reqexp=0)>EE(N3(unotice),any(unotice)) 初期([N1],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[N1]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[N1,N2]\nuser-constrained-policy-set=[N1]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1,N2]
+    requireExplicitPolicy=0
+    policyMappings=[[N1,N3]]
+  }
+  class EndEntity {
+    certificatePolicies=[N3,any]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> EndEntity
+```
+### 10.12.2 ポリシマップ拡張unotice正常系: RT>IA1(N1,N2,map=N1>N3,reqexp=0)>EE(N3(unotice),any(unotice)) 初期([N2],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[N2]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[N1,N2]\nuser-constrained-policy-set=[N2]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1,N2]
+    requireExplicitPolicy=0
+    policyMappings=[[N1,N3]]
+  }
+  class EndEntity {
+    certificatePolicies=[N3,any]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> EndEntity
+```
+### 10.13 ポリシマップ拡張unotice正常系: RT>IA1(N1(unotice),any(unotice),map=N1>N2,reqexp=0)>EE(N2) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[N1]\nuser-constrained-policy-set=[N1]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1,any]
+    requireExplicitPolicy=0
+    policyMappings=[[N1,N2]]
+  }
+  class EndEntity {
+    certificatePolicies=[N2]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> EndEntity
+```
+### 10.14 ポリシマップ拡張unotice正常系: RT>IA1(N1(unotice),any(unotice),map=N1>N2,reqexp=0)>EE(N1) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[N1]\nuser-constrained-policy-set=[N1]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1,any]
+    requireExplicitPolicy=0
+    policyMappings=[[N1,N2]]
+  }
+  class EndEntity {
+    certificatePolicies=[N1]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> EndEntity
+```
+## 11. ポリシー制約拡張のポリシーマッピング禁止(inhibitPolicyMapping)に関するテスト
+
+### 11.1 ポリシマップ禁止拡張異常系: RT>IA1(N1,reqexp=0,inhmap=0)>IA2(N1,map=N1>N2)>EE(N1,N2) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+    requireExplicitPolicy=0
+    inhibitPolicyMapping=0
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N1]
+    policyMappings=[[N1,N2]]
+  }
+  class EndEntity {
+    certificatePolicies=[N1,N2]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> EndEntity
+```
+### 11.2 ポリシマップ禁止拡張正常系: RT>IA1(N1,N2,reqexp=0,inhmap=1)>IA2(N1,N2,map=N1>N3:N2>N4)>EE(N3) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[N1]\nuser-constrained-policy-set=[N1]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1,N2]
+    requireExplicitPolicy=0
+    inhibitPolicyMapping=1
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N1,N2]
+    policyMappings=[[N1,N3],[N2,N4]]
+  }
+  class EndEntity {
+    certificatePolicies=[N3]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> EndEntity
+```
+### 11.3 ポリシマップ禁止拡張異常系: RT>IA1(N1,N2,reqexp=0,inhmap=1)>IA2(N1,N2,map=N1>N3:N2>N4)>IA3(N3,N4,map=N3>N5)>EE(N5) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1,N2]
+    requireExplicitPolicy=0
+    inhibitPolicyMapping=1
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N1,N2]
+    policyMappings=[[N1,N3],[N2,N4]]
+  }
+  class IntermediateCA3 {
+    certificatePolicies=[N3,N4]
+    policyMappings=[[N3,N5]]
+  }
+  class EndEntity {
+    certificatePolicies=[N5]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> IntermediateCA3
+IntermediateCA3 --|> EndEntity
+```
+### 11.4 ポリシマップ禁止拡張正常系: RT>IA1(N1,N2,reqexp=0,inhmap=1)>IA2(N1,N2,map=N1>N3:N2>N4)>IA3(N3,N4,map=N3>N5)>EE(N4) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[N2]\nuser-constrained-policy-set=[N2]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1,N2]
+    requireExplicitPolicy=0
+    inhibitPolicyMapping=1
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N1,N2]
+    policyMappings=[[N1,N3],[N2,N4]]
+  }
+  class IntermediateCA3 {
+    certificatePolicies=[N3,N4]
+    policyMappings=[[N3,N5]]
+  }
+  class EndEntity {
+    certificatePolicies=[N4]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> IntermediateCA3
+IntermediateCA3 --|> EndEntity
+```
+### 11.5 ポリシマップ禁止拡張異常系: RT>IA1(N1,reqexp=0,inhmap=5)>IA2(N1,inhmap=1)>IA3(N1)>IA4(N1,map=N1>N2)>EE(N2) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+    requireExplicitPolicy=0
+    inhibitPolicyMapping=5
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N1]
+    inhibitPolicyMapping=1
+  }
+  class IntermediateCA3 {
+    certificatePolicies=[N1]
+  }
+  class IntermediateCA4 {
+    certificatePolicies=[N1]
+    policyMappings=[[N1,N2]]
+  }
+  class EndEntity {
+    certificatePolicies=[N2]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> IntermediateCA3
+IntermediateCA3 --|> IntermediateCA4
+IntermediateCA4 --|> EndEntity
+```
+### 11.6 ポリシマップ禁止拡張異常系: RT>IA1(N1,N2,reqexp=0,inhmap=1)>IA2(N1,N2,inhmap=5)>IA3(N1,N2,map=N1>N3)>EE(N3) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1,N2]
+    requireExplicitPolicy=0
+    inhibitPolicyMapping=1
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N1,N2]
+    inhibitPolicyMapping=5
+  }
+  class IntermediateCA3 {
+    certificatePolicies=[N1,N2]
+    policyMappings=[[N1,N3]]
+  }
+  class EndEntity {
+    certificatePolicies=[N3]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> IntermediateCA3
+IntermediateCA3 --|> EndEntity
+```
+### 11.7 ポリシマップ禁止拡張正常系: RT>IA1(N1,reqexp=0,inhmap=1)>IA2si(N1)>IA3(N1,map=N1>N2)>EE(N2) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[N1]\nuser-constrained-policy-set=[N1]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+    requireExplicitPolicy=0
+    inhibitPolicyMapping=1
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N1]
+  }
+  class IntermediateCA3 {
+    certificatePolicies=[N1]
+    policyMappings=[[N1,N2]]
+  }
+  class EndEntity {
+    certificatePolicies=[N2]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA2 --|> IntermediateCA2
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> IntermediateCA3
+IntermediateCA3 --|> EndEntity
+```
+### 11.8 ポリシマップ禁止拡張異常系: RT>IA1(N1,reqexp=0,inhmap=1)>IA2(N1)>IA3(N1,map=N1>N2)>IA4(N2,map=N2>N3)>EE(N3) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+    requireExplicitPolicy=0
+    inhibitPolicyMapping=1
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N1]
+  }
+  class IntermediateCA3 {
+    certificatePolicies=[N1]
+    policyMappings=[[N1,N2]]
+  }
+  class IntermediateCA4 {
+    certificatePolicies=[N2]
+    policyMappings=[[N2,N3]]
+  }
+  class EndEntity {
+    certificatePolicies=[N3]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA2 --|> IntermediateCA2
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> IntermediateCA3
+IntermediateCA3 --|> IntermediateCA4
+IntermediateCA4 --|> EndEntity
+```
+### 11.9 ポリシマップ禁止拡張異常系:自己発行 RT>IA1(N1,reqexp=0,inhmap=1)>IA2si(N1)>IA3(N1,map=N1>N2)>IA4(N2,map=N2>N3)>EE(N2) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+    requireExplicitPolicy=0
+    inhibitPolicyMapping=1
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N1]
+  }
+  class IntermediateCA3 {
+    certificatePolicies=[N1]
+    policyMappings=[[N1,N2]]
+  }
+  class IntermediateCA4 {
+    certificatePolicies=[N2]
+    policyMappings=[[N2,N3]]
+  }
+  class EndEntity {
+    certificatePolicies=[N2]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA2 --|> IntermediateCA2
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> IntermediateCA3
+IntermediateCA3 --|> IntermediateCA4
+IntermediateCA4 --|> EndEntity
+```
+### 11.10 ポリシマップ禁止拡張異常系:自己発行 RT>IA1(N1,reqexp=0,inhmap=1)>IA2si(N1)>IA3(N1,map=N1>N2)>IA4(N2,map=N2>N3)>EE(N3) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+    requireExplicitPolicy=0
+    inhibitPolicyMapping=1
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N1]
+  }
+  class IntermediateCA3 {
+    certificatePolicies=[N1]
+    policyMappings=[[N1,N2]]
+  }
+  class IntermediateCA4 {
+    certificatePolicies=[N2]
+    policyMappings=[[N2,N3]]
+  }
+  class EndEntity {
+    certificatePolicies=[N3]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA2 --|> IntermediateCA2
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> IntermediateCA3
+IntermediateCA4 --|> IntermediateCA4
+IntermediateCA3 --|> IntermediateCA4
+IntermediateCA4 --|> EndEntity
+```
+### 11.11 ポリシマップ禁止拡張異常系:自己発行 RT>IA1(N1,reqexp=0,inhmap=1)>IA2si(N1)>IA3(N1,map=N1>N2)>IA4si(N2,map=N2>N3)>EE(N2) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+    requireExplicitPolicy=0
+    inhibitPolicyMapping=1
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N1]
+  }
+  class IntermediateCA3 {
+    certificatePolicies=[N1]
+    policyMappings=[[N1,N2]]
+  }
+  class IntermediateCA4 {
+    certificatePolicies=[N2]
+    policyMappings=[[N2,N3]]
+  }
+  class EndEntity {
+    certificatePolicies=[N2]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA2 --|> IntermediateCA2
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> IntermediateCA3
+IntermediateCA4 --|> IntermediateCA4
+IntermediateCA3 --|> IntermediateCA4
+IntermediateCA4 --|> EndEntity
+```
+## 12. 任意ポリシー禁止拡張(inhibitAnyPolicy)に関するテスト
+
+### 12.1 任意ポリシ禁止拡張異常系 RT>IA1(N1,reqexp=0,inhany=0)>EE(any) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+    requireExplicitPolicy=0
+    inhibitAnyPolicy=0
+  }
+  class EndEntity {
+    certificatePolicies=[any]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> EndEntity
+```
+### 12.2 任意ポリシ禁止拡張正常系 RT>IA1(N1,reqexp=0,inhany=0)>EE(any,N1) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[N1]\nuser-constrained-policy-set=[N1]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+    requireExplicitPolicy=0
+    inhibitAnyPolicy=0
+  }
+  class EndEntity {
+    certificatePolicies=[N1,any]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> EndEntity
+```
+### 12.3.1 任意ポリシ禁止拡張正常系 RT>IA1(N1,reqexp=0,inhany=1)>IA2(any)>EE(N1) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=有効\nauthorities-constrained-policy-set=[N1]\nuser-constrained-policy-set=[N1]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+    requireExplicitPolicy=0
+    inhibitAnyPolicy=1
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[any]
+  }
+  class EndEntity {
+    certificatePolicies=[N1]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> EndEntity
+```
+### 12.3.2 任意ポリシ禁止拡張異常系 RT>IA1(N1,reqexp=0,inhany=1)>IA2(any)>EE(N1) 初期([any],exp0,map,any1)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=true"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+    requireExplicitPolicy=0
+    inhibitAnyPolicy=1
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[any]
+  }
+  class EndEntity {
+    certificatePolicies=[N1]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> EndEntity
+```
+### 12.4 任意ポリシ禁止拡張異常系 RT>IA1(N1,reqexp=0,inhany=1)>IA2(any)>EE(any) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+    requireExplicitPolicy=0
+    inhibitAnyPolicy=1
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[any]
+  }
+  class EndEntity {
+    certificatePolicies=[any]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> EndEntity
+```
+### 12.5 任意ポリシ禁止拡張異常系 RT>IA1(N1,reqexp=0,inhany=5)>IA2(N1,inhany=1)>IA3(N1)>EE(any) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+    requireExplicitPolicy=0
+    inhibitAnyPolicy=5
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N1]
+    inhibitAnyPolicy=1
+  }
+  class IntermediateCA3 {
+    certificatePolicies=[N1]
+  }
+  class EndEntity {
+    certificatePolicies=[any]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> IntermediateCA3
+IntermediateCA3 --|> EndEntity
+```
+### 12.6 任意ポリシ禁止拡張異常系 RT>IA1(N1,reqexp=0,inhany=1)>IA2(N1,inhany=5)>EE(any) 初期([any],exp0,map,any0)
+
+```mermaid
+classDiagram
+  direction LR
+  note "入力初期値\nuser-initial-policy-set=[any]\ninitial-explicit-policy=false\ninitial-inhibit-policymapping=false\ninitial-inhibit-any-policy=false"
+  note "期待値\nパス構築結果=無効\nauthorities-constrained-policy-set=[]\nuser-constrained-policy-set=[]"
+  class TrustAnchor {
+    
+  }
+  class IntermediateCA1 {
+    certificatePolicies=[N1]
+    requireExplicitPolicy=0
+    inhibitAnyPolicy=1
+  }
+  class IntermediateCA2 {
+    certificatePolicies=[N1]
+    inhibitAnyPolicy=5
+  }
+  class EndEntity {
+    certificatePolicies=[any]
+  }
+TrustAnchor --|> TrustAnchor
+TrustAnchor --|> IntermediateCA1
+IntermediateCA1 --|> IntermediateCA2
+IntermediateCA2 --|> EndEntity
+```
