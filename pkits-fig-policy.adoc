@@ -13,10 +13,16 @@
 
 - 図の表記法である https://mermaid.js.org/[Mermaid] のクラス図を利用して証明書の認証パス、初期値、期待値を図にしています。
 - 証明書ポリシーは以下のように簡略化してます。
- - anyPolicyはanyとします。
- - PKITSテスト用証明書ポリシOID(2.16.840.1.101.3.2.1.48.1〜8)はN1〜8とします。
+ * anyPolicyはanyとします。
+ * PKITSテスト用証明書ポリシOID(2.16.840.1.101.3.2.1.48.1〜8)はN1〜8とします。
 - 自己発行(self issued)証明書はクラスの自身にループする矢印で表現します。
 - 証明書の発行はそれ以外の矢印で表現します。
+- 証明書拡張について
+ * ポリシ拡張(certificatePolicies)は+certificatePolicies=[ポリシOID1,ポリシOID2...]+と表ます。
+ * ポリシ制約拡張(policyConstraints)のポリシ明示必須(requireExplicitPolicy)フィールドの値は+requireExplicitPolicy=スキップ値+と表ます。
+ * ポリシ制約拡張(policyConstraints)のポリシマップ禁止(inhibitPolicyMappping)フィールドの値は+inhibitPolicyMapping=スキップ値+と表ます。
+ * anyPolicy禁止拡張(inhibitPolicyMapping)の値は+inhibitAnyPoilcy=スキップ値+と表ます。
+ * ポリシマッピング拡張(policyMappings)の値は+policyMappings=[[元ポリシ1,先ポリシ1],...]と表ます。
 
 ## 8. 証明書ポリシーツリーに関する基本的なテスト
 
